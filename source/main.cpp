@@ -49,14 +49,14 @@ private:
         if (ntpTime != 0) {
             if (setNetworkSystemClock(ntpTime)) {
                 if (tsl::notification)
-                    tsl::notification->show("Synced with " + srv, 24);
+                    tsl::notification->showNow("Synced with " + srv, 24);
             } else {
                 if (tsl::notification)
-                    tsl::notification->show("Unable to set network clock", 24);
+                    tsl::notification->showNow("Unable to set network clock", 24);
             }
         } else {
             if (tsl::notification)
-                tsl::notification->show("Error: Failed to get NTP time", 24);
+                tsl::notification->showNow("Error: Failed to get NTP time", 24);
         }
 
         delete client;
@@ -81,10 +81,10 @@ private:
 
         if (setNetworkSystemClock(userTime)) {
             if (tsl::notification)
-                tsl::notification->show(usr + gr8, 24);
+                tsl::notification->showNow(usr + gr8, 24);
         } else {
             if (tsl::notification)
-                tsl::notification->show("Unable to set network clock", 24);
+                tsl::notification->showNow("Unable to set network clock", 24);
         }
     }
 
@@ -93,7 +93,7 @@ private:
         Result rs = timeGetCurrentTime(TimeType_NetworkSystemClock, (u64*)&currentTime);
         if (R_FAILED(rs)) {
             if (tsl::notification)
-                tsl::notification->show("GetTimeNetwork " + std::to_string(rs), 24);
+                tsl::notification->showNow("GetTimeNetwork " + std::to_string(rs), 24);
             return;
         }
 
@@ -104,10 +104,10 @@ private:
         
         if (ntpTimeOffset != LLONG_MIN) {
             if (tsl::notification)
-                tsl::notification->show("Offset: " + std::to_string(ntpTimeOffset) + "s", 24);
+                tsl::notification->showNow("Offset: " + std::to_string(ntpTimeOffset) + "s", 24);
         } else {
             if (tsl::notification)
-                tsl::notification->show("Error: Failed to get offset", 24);
+                tsl::notification->showNow("Error: Failed to get offset", 24);
         }
 
         delete client;
@@ -220,7 +220,7 @@ public:
         });
         list->addItem(trackbar);
 
-        list->addItem(new tsl::elm::CustomDrawer([](tsl::gfx::Renderer* renderer, s32 x, s32 y, s32 w, s32 h) {}), 12);
+        list->addItem(new tsl::elm::CustomDrawer([](tsl::gfx::Renderer* renderer, s32 x, s32 y, s32 w, s32 h) {}), 24);
 
         auto* syncTimeItem = new tsl::elm::ListItem("Sync time");
         syncTimeItem->setClickListener(syncListener(HidNpadButton_A));
