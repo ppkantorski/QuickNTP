@@ -1,6 +1,5 @@
 #include <arpa/inet.h>
 #include <errno.h>
-#include <exception>
 #include <netdb.h>
 #include <string>
 #include <sys/socket.h>
@@ -10,12 +9,9 @@
 #include <unistd.h>
 
 #define UNIX_OFFSET 2208988800L
-
 #define NTP_DEFAULT_SERVER "pool.ntp.org"
 #define NTP_DEFAULT_PORT "123"
 #define NTP_DEFAULT_TIMEOUT 3
-
-// Flags 00|100|011 for li=0, vn=4, mode=3
 #define NTP_FLAGS 0x23
 
 typedef struct {
@@ -34,21 +30,7 @@ typedef struct {
     uint32_t recv_ts_fracs;
     uint32_t transmit_ts_secs;
     uint32_t transmit_ts_frac;
-
 } ntp_packet;
-
-class NtpException : public std::runtime_error {
-private:
-    int m_code;
-
-public:
-    NtpException(int code, const std::string& message)
-        : std::runtime_error(message), m_code(code) {}
-
-    int code() const noexcept {
-        return m_code;
-    }
-};
 
 class NTPClient {
 private:
@@ -60,13 +42,13 @@ public:
     NTPClient(const char* server = NTP_DEFAULT_SERVER, const char* port = NTP_DEFAULT_PORT, int timeout = NTP_DEFAULT_TIMEOUT)
         : m_server(server), m_port(port), m_timeout(timeout) {}
 
-    time_t getTime() noexcept(false) {
+    time_t getTime() {
         int status;
         struct addrinfo hints, *servinfo;
         hints = (struct addrinfo){.ai_family = AF_INET, .ai_socktype = SOCK_DGRAM};
-
+        
         if ((status = getaddrinfo(m_server, m_port, &hints, &servinfo)) != 0) {
-            throw NtpException(1, "Unable to get address info (" + std::string(gai_strerror(status)) + ")");
+            return 0; // Return 0 on error
         }
 
         struct addrinfo* ap;
@@ -81,17 +63,16 @@ public:
             }
 
             struct timeval tv = {.tv_sec = m_timeout, .tv_usec = 0};
-
             if (setsockopt(server_sock, SOL_SOCKET, SO_RCVTIMEO, &tv, sizeof(tv)) < 0) {
                 close(server_sock);
                 freeaddrinfo(servinfo);
-                throw NtpException(2, "Unable to set socket receive timeout");
+                return 0; // Return 0 on error
             }
 
             if (setsockopt(server_sock, SOL_SOCKET, SO_SNDTIMEO, &tv, sizeof(tv)) < 0) {
                 close(server_sock);
                 freeaddrinfo(servinfo);
-                throw NtpException(3, "Unable to set socket send timeout");
+                return 0; // Return 0 on error
             }
 
             if (sendto(server_sock, &packet, sizeof(packet), 0, ap->ai_addr, ap->ai_addrlen) == -1) {
@@ -111,19 +92,22 @@ public:
         }
 
         freeaddrinfo(servinfo);
+
         if (!time_retrieved) {
-            throw NtpException(4, "Unable to connect to NTP server");
+            return 0; // Return 0 on error
         }
 
         close(server_sock);
 
         packet.recv_ts_secs = ntohl(packet.recv_ts_secs);
-
         return packet.recv_ts_secs - UNIX_OFFSET;
     }
 
-    long getTimeOffset(time_t currentTime) noexcept(false) {
+    long getTimeOffset(time_t currentTime) {
         time_t ntpTime = getTime();
+        if (ntpTime == 0) {
+            return LLONG_MIN; // Return special value on error
+        }
         return currentTime - ntpTime;
     }
 };

@@ -63,23 +63,48 @@ private:
     }
 
     void setNetworkTimeAsUser() {
+        // Check internet connectivity first
+        NifmInternetConnectionStatus connectionStatus;
+        Result nifmResult = nifmGetInternetConnectionStatus(nullptr, nullptr, &connectionStatus);
+        if (R_FAILED(nifmResult) || connectionStatus != NifmInternetConnectionStatus_Connected) {
+            if (tsl::notification)
+                tsl::notification->showNow(ult::NOTIFY_HEADER+"Unable to set network clock", 22);
+            return;
+        }
+    
         time_t userTime, netTime;
-
+    
         Result rs = timeGetCurrentTime(TimeType_UserSystemClock, (u64*)&userTime);
         if (R_FAILED(rs)) {
             if (tsl::notification)
-                tsl::notification->show(ult::NOTIFY_HEADER+"GetTimeUser " + std::to_string(rs), 22);
+                tsl::notification->showNow(ult::NOTIFY_HEADER+"GetTimeUser " + std::to_string(rs), 22);
             return;
         }
-
-        std::string usr = "User time!";
+    
+        // Validate that userTime is reasonable (not 0 or negative)
+        if (userTime <= 0) {
+            if (tsl::notification)
+                tsl::notification->showNow(ult::NOTIFY_HEADER+"Invalid user time", 22);
+            return;
+        }
+    
+        // Check if user time appears to be uninitialized (before year 2017, when Switch was released)
+        // Unix timestamp for Jan 1, 2017 is 1483228800
+        if (userTime < 1483228800) {
+            if (tsl::notification)
+                tsl::notification->showNow(ult::NOTIFY_HEADER+"User time not set", 22);
+            return;
+        }
+    
+        std::string usr = "User time set!";
         std::string gr8 = "";
         rs = timeGetCurrentTime(TimeType_NetworkSystemClock, (u64*)&netTime);
         if (R_SUCCEEDED(rs) && netTime < userTime) {
             gr8 = " Great Scott!";
         }
-
-        if (setNetworkSystemClock(userTime)) {
+    
+        Result setResult = timeSetCurrentTime(TimeType_NetworkSystemClock, (uint64_t)userTime);
+        if (R_SUCCEEDED(setResult)) {
             if (tsl::notification)
                 tsl::notification->showNow(ult::NOTIFY_HEADER+usr + gr8, 22);
         } else {
