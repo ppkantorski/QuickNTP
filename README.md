@@ -1,4 +1,4 @@
-# QuickNTP
+# QuickNTP (libultrahand build)
 
 ---
 
