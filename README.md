@@ -31,7 +31,7 @@ My_Ntp_Server = ntp.example.com
 
 Underscores will be replaced by spaces in the UI!
 
-The homebrew will look for the file with the following order priority:
+The homebrew will look for the file in the following locations (*the first valid file will be used*):
 - /config/quickntp.ini
 - /config/quickntp/config.ini
 - /switch/.overlays/quickntp.ini
