@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0] - 2025-11-29
+
+### Changed
+
+- 4MB heap support (thanks to [@ppkantorski](https://github.com/ppkantorski))
+- Inverse order priority for config file as originally intended
+
 ## [1.5.2] - 2025-11-18
 
 ### Updated
@@ -107,6 +114,7 @@ Thanks to [@DarkMatterCore](https://github.com/DarkMatterCore)!
 
 - First release
 
+[1.6.0]: https://github.com/nedex/QuickNTP/compare/1.5.2...1.6.0
 [1.5.2]: https://github.com/nedex/QuickNTP/compare/1.5.1...1.5.2
 [1.5.1]: https://github.com/nedex/QuickNTP/compare/1.5.0...1.5.1
 [1.5.0]: https://github.com/nedex/QuickNTP/compare/1.2.8-1...1.5.0
