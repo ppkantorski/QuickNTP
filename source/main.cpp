@@ -1,8 +1,5 @@
-#ifndef APP_VERSION
-#define APP_VERSION "1.0.0"
-#endif
-
 #define TESLA_INIT_IMPL
+#include <exception_wrap.hpp>
 #include <tesla.hpp>
 
 #include <string>
@@ -244,25 +241,28 @@ public:
             static bool wasTriggered = false;
             
             // Only trigger animation on initial press (keys down), not while held
-            if (((keys & HidNpadButton_A) || (keys & HidNpadButton_Y)) && !wasTriggered) {
+            if (((keys & KEY_A) || (keys & KEY_Y)) && !wasTriggered) {
                 trackbar->triggerClickAnimation();
-                triggerEnterFeedback();
+                if (keys & KEY_A)
+                    triggerEnterFeedback();
+                else
+                    triggerSettingsFeedback();
                 wasTriggered = true;
             }
             
             // Reset flag when key is released
-            if (!(keys & HidNpadButton_A) && !(keys & HidNpadButton_Y)) {
+            if (!(keys & KEY_A) && !(keys & KEY_Y)) {
                 wasTriggered = false;
             }
             
-            return syncListener(HidNpadButton_A)(keys) || offsetListener(HidNpadButton_Y)(keys);
+            return syncListener(KEY_A)(keys) || offsetListener(KEY_Y)(keys);
         });
         list->addItem(trackbar);
 
         list->addItem(new tsl::elm::CustomDrawer([](tsl::gfx::Renderer* renderer, s32 x, s32 y, s32 w, s32 h) {}), 24);
 
         auto* syncTimeItem = new tsl::elm::ListItem("Sync time");
-        syncTimeItem->setClickListener(syncListener(HidNpadButton_A));
+        syncTimeItem->setClickListener(syncListener(KEY_A));
         list->addItem(syncTimeItem);
 
         list->addItem(new tsl::elm::CustomDrawer([](tsl::gfx::Renderer* renderer, s32 x, s32 y, s32 w, s32 h) {
@@ -271,7 +271,7 @@ public:
                       50);
 
         auto* getOffsetItem = new tsl::elm::ListItem("Get offset");
-        getOffsetItem->setClickListener(offsetListener(HidNpadButton_A));
+        getOffsetItem->setClickListener(offsetListener(KEY_A));
         list->addItem(getOffsetItem);
 
         list->addItem(new tsl::elm::CustomDrawer([](tsl::gfx::Renderer* renderer, s32 x, s32 y, s32 w, s32 h) {
@@ -281,7 +281,7 @@ public:
 
         auto* setToInternalItem = new tsl::elm::ListItem("User-set time");
         setToInternalItem->setClickListener([this](u64 keys) {
-            if (keys & HidNpadButton_A) {
+            if (keys & KEY_A) {
                 return operationBlock([&]() {
                     setNetworkTimeAsUser();
                 });
