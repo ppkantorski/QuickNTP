@@ -38,7 +38,7 @@ include $(DEVKITPRO)/libnx/switch_rules
 #   NACP building is skipped as well.
 #---------------------------------------------------------------------------------
 APP_TITLE	:=	QuickNTP
-APP_VERSION	:=	1.6.0+r4
+APP_VERSION	:=	1.6.0+r5
 
 TARGET		:=	$(notdir $(CURDIR))
 BUILD		:=	build
