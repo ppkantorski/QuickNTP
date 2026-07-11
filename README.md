@@ -51,6 +51,7 @@ The homebrew will look for the file in the following locations (*the first valid
 
 - [@DarkMatterCore](https://github.com/DarkMatterCore) (library updates)
 - [@DraconicNEO](https://github.com/DraconicNEO) (new NTP servers)
+- [@ppkantorski](https://github.com/ppkantorski) (Ultrahand version and 4MB heap support)
 
 ## Credits
 
